@@ -2,35 +2,47 @@
     <div class="mt-7">
         <div v-if="store.cart.length > 0" class="flex justify-between max-w-[900px] m-auto">
             <div class="flex flex-col items-center">
-                <book-cards-list class="flex flex h-[400px] w-[305px] overflow-x-hidden" :books="store.cart"/>
+                <book-cards-list class="flex flex h-[510px] w-[420px] overflow-x-hidden" :books="store.cart"/>
                 <button v-if="store.cart.length > 1" @click="clearCart" class="bg-black text-white py-2 px-4 rounded-sm font-semibold mt-6">Remove all</button>
             </div>
             <div>
-                <form action="/payment">
+                <Form :validation-schema="schema" @submit="checkout">
                     <div class="flex gap-4 items-center">
                         <label class="flex flex-col" for="name">
                             Name
-                            <input v-model.trim="name" class="border-[1px] border-black py-4 px-2 rounded-sm mt-1" type="text" id="name" name="name" placeholder="Sam">
+                            <Field v-model.trim="name" class="border-[1px] border-black py-4 px-2 rounded-sm mt-1" type="text" id="name" name="name" placeholder="Sam" />
+                            <ErrorMessage name="name"/>
                         </label>
-                        <label class="flex flex-col" for="name">
+                        <label class="flex flex-col" for="surname">
                             Surname
-                            <input v-model.trim="surname" class="border-[1px] border-black py-4 px-2 rounded-sm mt-1" type="text" id="name" name="name" placeholder="Altman">
+                            <Field v-model.trim="surname" class="border-[1px] border-black py-4 px-2 rounded-sm mt-1" type="text" id="surname" name="surname" placeholder="Altman" />
+                            <ErrorMessage name="surname"/>
                         </label>
                     </div>
                     <div>
                         <label class="flex flex-col mt-4" for="card">
                             Card
-                            <input v-model="card" @input="formattedCard" maxlength="19" class="border-[1px] border-black py-4 px-2 rounded-sm mt-1" type="text" id="card" name="card" placeholder="4111 4444 4444 4444">
+                            <Field v-model="card" @input="formattedCard" maxlength="19" class="border-[1px] border-black py-4 px-2 rounded-sm mt-1" type="text" id="card" name="card" placeholder="4111 4444 4444 4444" />
+                            <ErrorMessage name="card"/>
                         </label>
                     </div>
                     <div class="flex gap-4 items-center">
-                        <label class="flex flex-col mt-4" for="card">
+                        <label class="flex flex-col mt-4" for="valid">
                             Valid until
-                            <input v-model="valid" @input="formattedValid" maxlength="5" class="border-[1px] border-black py-4 px-2 rounded-sm mt-1" type="text" id="card" name="card" placeholder="12/35">
+                            <Field v-model="valid" @input="formattedValid" maxlength="5" class="border-[1px] border-black py-4 px-2 rounded-sm mt-1" type="text" id="valid" name="valid" placeholder="12/35" />
+                            <ErrorMessage name="valid"/>
                         </label>
-                        <label class="flex flex-col mt-4" for="card">
+                        <label class="flex flex-col mt-4" for="cvv">
                             CVV
-                            <input v-model.number="cvv" maxlength="3" class="border-[1px] border-black py-4 px-2 rounded-sm mt-1" type="text" id="card" name="card" placeholder="000">
+                            <Field v-model.number="cvv" maxlength="3" class="border-[1px] border-black py-4 px-2 rounded-sm mt-1" type="text" id="cvv" name="cvv" placeholder="000" />
+                            <ErrorMessage name="cvv"/>
+                        </label>
+                    </div>
+                    <div>
+                        <label class="flex flex-col mt-4" for="coupon">
+                            Coupon
+                            <Field v-model="coupon" maxlength="15" class="border-[1px] border-black py-4 px-2 rounded-sm mt-1" type="text" id="coupon" name="coupon" placeholder="XRPBTCETH" />
+                            <ErrorMessage name="coupon"/>
                         </label>
                     </div>
                 </form>
@@ -39,7 +51,7 @@
                         <p>Discount: $0.00</p>
                         <p>Total: ${{ total }}</p>
                     </div>
-                    <button @click="performCheckout" class="bg-black text-white py-2 px-4 rounded-sm font-semibold mt-6">Checkout</button>
+                    <button class="bg-black text-white py-2 px-4 rounded-sm font-semibold mt-6">Checkout</button>
                 </div>
             </div>
         </div>
@@ -59,11 +71,17 @@ import { useBookStore } from "../store/store";
 import BookCardsList from "../components/UI/lists/BookCardsCartList.vue";
 import { ref, computed } from "vue";
 import API from "../API/instance";
+import * as yup from "yup";
+import { Form, Field, ErrorMessage } from "vee-validate";
 
 const store = useBookStore();
 
 const name = ref("");
 const surname = ref("");
+const cvv = ref("");
+const orderID = ref("");
+const coupon = ref("");
+const isFormSent = ref(false);
 
 const card = ref("");
 const formattedCard = computed(() => {
@@ -81,13 +99,9 @@ const formattedValid = computed(() => {
       valid.value = formatted;
     });
 
-const cvv = ref("");
-
 const total = computed(() => store.cart.reduce((sum, book) => sum + book.price, 0).toFixed(2));
 
-const isFormSent = ref(false);
-
-const performCheckout = async () => {
+const checkout = async () => {
     isFormSent.value = true;
     try {
         generateOrderID();
@@ -98,7 +112,8 @@ const performCheckout = async () => {
             valid: valid.value,
             cvv: cvv.value,
             products: JSON.stringify(store.cart),
-            orderID: orderID.value
+            orderID: orderID.value,
+            coupon: coupon.value
         };
         const response = await API.post("/order", data);
         setTimeout(() => {
@@ -109,6 +124,7 @@ const performCheckout = async () => {
         card.value = "";
         valid.value = "";
         cvv.value = "";
+        coupon.value = "";
         store.cart = [];
         return response.data;
     } catch (error) {
@@ -120,8 +136,6 @@ const clearCart = () => {
     store.cart = [];
 }
 
-const orderID = ref("");
-
 const generateOrderID = () => {
     const min = 10000000;
     const max = 99999999;
@@ -130,4 +144,13 @@ const generateOrderID = () => {
 
     orderID.value = randomNumber;
 }
+
+const schema = yup.object({
+    name: yup.string().required(),
+    surname: yup.string().required(),
+    card: yup.string().required().max(15),
+    valid: yup.string().required().max(5),
+    cvv: yup.string().required().max(3),
+    coupon: yup.string().max(15)
+})
 </script>

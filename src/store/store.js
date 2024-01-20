@@ -7,7 +7,7 @@ export const useBookStore = defineStore("books", () => {
     const fetchedBooks = ref([]);
     const searchedBook = ref("");
     const cart = ref([]);
-    const wishlist = ref([]);
+    const wishlistBooks = ref([]);
 
     const fetchBooks = async () => {
         try {
@@ -28,14 +28,18 @@ export const useBookStore = defineStore("books", () => {
         cart.value = cart.value.filter(book => book.id !== id);
     }
 
-    const addToWishlist = (book) => {
-        wishlist.value.push({ ...book });
-        localStorage.setItem('wishlist', JSON.stringify(wishlist.value));
+    const addBookToWishlist = (book) => {
+        wishlistBooks.value.push(book)
+        const storedWishlistBooks = JSON.parse(localStorage.getItem('wishlist')) || []
+        storedWishlistBooks.push(book)
+        localStorage.setItem('wishlist', JSON.stringify(storedWishlistBooks))
     }
-
-    const removeFromWishlist = (id) => {
-        wishlist.value = wishlist.value.filter(book => book.id !== id);
-        localStorage.setItem('wishlist', JSON.stringify(wishlist.value));
+    
+    const removeBookFromWishlist = (id) => {
+        wishlistBooks.value = wishlistBooks.value.filter(book => book.id !== id)
+        const storedWishlistBooks = JSON.parse(localStorage.getItem('wishlist')) 
+        const updatedWishlistBooks = storedWishlistBooks.filter(book => book.id !== id)
+        localStorage.setItem('wishlist', JSON.stringify(updatedWishlistBooks))
     }
 
     return { 
@@ -43,10 +47,10 @@ export const useBookStore = defineStore("books", () => {
         fetchedBooks, 
         searchedBook,
         addToCart,
+        addBookToWishlist,
+        removeBookFromWishlist,
         cart,
         removeFromCart,
-        addToWishlist,
-        removeFromWishlist,
-        wishlist,
+        wishlistBooks
     };
 });

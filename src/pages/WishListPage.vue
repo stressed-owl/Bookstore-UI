@@ -1,14 +1,25 @@
 <template>
     <div class="mt-7">
-        <p>Total books in the wishlist: {{ books.length }}</p>
-        <book-cards-list :books="books"></book-cards-list>
+        <p class="text-center font-medium text-2xl">
+            Total books in the wishlist:
+            <span class="font-bold">{{ store.wishlistBooks.length }}</span>
+        </p>
+        <book-cards-wish-list class="mt-6" :books="store.wishlistBooks"/>
     </div>
 </template>
 
 <script setup>
-import { useBookStore } from '../store/store';
-import BookCardsList from '../components/UI/lists/BookCardsWishList.vue';
-import { ref } from 'vue';
+import { watch } from "vue";
+import { useBookStore } from "../store/store";
+import BookCardsWishList from "../components/UI/lists/BookCardsWishList.vue";
 
-const books = ref(JSON.parse(localStorage.getItem("wishlist")));
+const store = useBookStore();
+const storedWishlistBooks = JSON.parse(localStorage.getItem('wishlist'))
+if (storedWishlistBooks) {
+    store.wishlistBooks = storedWishlistBooks;
+}
+
+watch(store.wishlistBooks, (newValue) => {
+    localStorage.setItem("wishlist", JSON.stringify(newValue));
+});
 </script>

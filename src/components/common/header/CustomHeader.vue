@@ -18,14 +18,7 @@
                     </div>
                 </router-link>
                 <router-link to="/wishlist">
-                    <div class="relative">
-                        <img src="../../../../src/assets/list_icon.svg"/>
-                        <div>
-                            <div class="w-[20px] h-[20px] rounded-[50%] bg-black absolute top-[-6px] right-[-3px] text-white flex items-center justify-center text-[12px] font-bold">
-                                {{ wishlistBooks.length || 0 }}
-                            </div>
-                        </div>
-                    </div>
+                    <img src="../../../../src/assets/list_icon.svg"/>
                 </router-link>
             </div>
         </template>
@@ -39,8 +32,6 @@ import BookSearch from './BookSearch.vue';
 import MainLinksList from '../links/MainLinksList.vue';
 import CatalogLinksList from './CatalogLinksList.vue';
 import { useBookStore } from '../../../store/store';
-import { ref } from 'vue';
 
 const store = useBookStore();
-const wishlistBooks = ref(JSON.parse(localStorage.getItem('wishlist') || "{}"));
 </script>

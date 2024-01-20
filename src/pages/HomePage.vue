@@ -1,9 +1,5 @@
 <template>
     <div>
-        <div class="flex items-center justify-center">
-            <img src="../assets/home_banner.webp" alt="banner">
-        </div>
-        <p class="text-center font-semibold mt-5">Found books: {{ filteredBooks.length }}</p>
         <div class="mt-10">
             <book-cards-list :books="filteredBooks" />
         </div>

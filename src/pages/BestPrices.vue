@@ -1,6 +1,5 @@
 <template>
     <div class="mt-5">
-        <p class="text-center font-semibold">Found books: {{ bestPrices.length }}</p>
         <div class="mt-10">
             <book-cards-list :books="bestPrices" />
         </div>
