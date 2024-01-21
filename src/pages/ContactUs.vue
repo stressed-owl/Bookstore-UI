@@ -70,6 +70,7 @@ const submit = async () => {
             email: email.value,
             message: message.value,
         };
+
         const response = await API.post("/contact", data);
 
         if (response.status === 200 || response.status === 201) {
@@ -83,6 +84,7 @@ const submit = async () => {
                 isFormSentError.value = false;
             }, 100000);
         }
+        
         username.value = "";
         phoneNumber.value = "";
         message.value = "";

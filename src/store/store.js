@@ -21,11 +21,17 @@ export const useBookStore = defineStore("books", () => {
     }
 
     const addToCart = (book) => {
-        cart.value.push({ ...book });
+        cart.value.push(book)
+        const storedCartBooks = JSON.parse(localStorage.getItem('cart')) || []
+        storedCartBooks.push(book)
+        localStorage.setItem('cart', JSON.stringify(storedCartBooks))
     }
 
     const removeFromCart = (id) => {
-        cart.value = cart.value.filter(book => book.id !== id);
+        cart.value = cart.value.filter(book => book.id !== id)
+        const storedCartBooks = JSON.parse(localStorage.getItem('cart')) 
+        const updatedCartBooks = storedCartBooks.filter(book => book.id !== id)
+        localStorage.setItem('cart', JSON.stringify(updatedCartBooks))
     }
 
     const addBookToWishlist = (book) => {
